@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="movie camera emoji favicon">
+  <title>Movie Camera Emoji</title>
+  <!-- Transparent background; only the emoji glyph is drawn so the favicon remains crisp and has no colored dots behind it -->
+  <g font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, 'Segoe UI Symbol', sans-serif" font-size="44" text-anchor="middle">
+    <text x="32" y="44">🎥</text>
+  </g>
+</svg>

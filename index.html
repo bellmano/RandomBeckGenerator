@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <title>Beck-films Generatorn</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="icon" type="image/x-icon" href="img/favicon.svg">
+    <link rel="stylesheet" href="src/style.css">
+    <script src="data/beckDB.js"></script>
+    <script src="src/script.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Slumpmässig Beck-films Generator</h1>
+            <p>Svårt att bestämma sig vilken Beck-film det blir? Låt slumpgeneratorn göra jobbet!</p>
+        </header>
+
+        <main>
+            <div class="controls">
+                <div class="all-movies-option">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="all-movies-checkbox">
+                        <span class="checkmark"></span>
+                        Slumpa alla filmer
+                    </label>
+                </div>
+                <div class="range-selector" id="range-selector">
+                    <label for="min-range">Från:</label>
+                    <input type="number" id="min-range" min="1" value="1">
+                    <label for="max-range">Till:</label>
+                    <input type="number" id="max-range" min="1">
+                </div>
+                <button id="generate-btn" class="generate-button">Generera Slumpmässig Beck-film</button>
+            </div>
+
+            <div id="movie-result" class="movie-card hidden">
+                <div class="movie-poster">
+                    <img id="movie-image" src="" alt="Filmaffisch">
+                </div>
+                <div class="movie-details">
+                    <h2 id="movie-title"></h2>
+                    <div id="movie-rating" class="movie-rating hidden"></div>
+                    <p id="movie-description"></p>
+                    <a id="movie-link" href="" target="_blank" class="movie-link">Streama filmen på TV4 Play</a>
+                </div>
+            </div>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Hittar din slumpmässiga Beck-film...</p>
+            </div>
+
+            <div id="error" class="error hidden">
+                <p>Tyvärr, kunde inte ladda filminformationen. Vänligen försök igen.</p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; <script>document.write(new Date().getFullYear())</script> Mattias Mälman</p>
+                <a href="https://github.com/bellmano/randombeck.se" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub">
+                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 0a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17 4.7 18 5 18 5c.6 1.6.2 2.8 0 3.2.8.8 1.3 1.9 1.3 3.1 0 4.7-2.8 5.7-5.5 6 .5.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 0z"/>
+                    </svg>
+                </a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
