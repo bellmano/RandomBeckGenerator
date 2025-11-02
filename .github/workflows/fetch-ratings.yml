@@ -3,12 +3,16 @@ on:
   schedule:
     - cron: '0 2 * * *' # Runs every night at 02:00 UTC
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   fetch-ratings:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -19,8 +23,12 @@ jobs:
         run: node data/fetchRatings.js
       - name: Commit and push changes
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --local user.name 'github-actions[bot]'
+          git config --local user.email 'github-actions[bot]@users.noreply.github.com'
           git add data/beckDB.js
-          git commit -m "Update IMDB ratings automatically"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update IMDB ratings automatically"
+            git push
+          fi
