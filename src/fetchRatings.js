@@ -11,13 +11,13 @@ function extractRating(html) {
     const patterns = [
         // New IMDB rating pattern - looks for rating/10 format
         /(\d+\.\d)\/10/,
-        // Alternative pattern for span with rating value
-        /<span[^>]*>(\d+\.\d)<\/span>/,
+        // Alternative pattern for span with rating value - made safer with possessive quantifier alternative
+        /<span[^>]{0,200}>(\d+\.\d)<\/span>/,
         // Legacy patterns for backward compatibility
         /<span class="sc-[a-z0-9]+-1[^"]*" data-testid="hero-rating-bar__aggregate-rating__score">(\d+\.\d)<\/span>/,
         /<span itemprop="ratingValue">(\d+\.\d)<\/span>/,
-        // Additional pattern for rating display
-        /IMDb RATING[^0-9]*(\d+\.\d)/i
+        // Additional pattern for rating display - limited backtracking
+        /IMDb RATING[^0-9]{0,50}(\d+\.\d)/i
     ];
     
     for (const pattern of patterns) {
@@ -33,9 +33,10 @@ async function updateRatings() {
     let dbContent = fs.readFileSync(dbPath, 'utf8');
     let movies;
     try {
-        dbContent = dbContent.replace(/const beckMovies = /, '');
+        dbContent = dbContent.replace(/const beckMovies = /, 'return ');
         dbContent = dbContent.replace(/;\s*$/, '');
-        movies = eval(dbContent);
+        const parseFunction = new Function(dbContent);
+        movies = parseFunction();
     } catch (e) {
         console.error('Failed to parse beckDB.js:', e);
         return;
