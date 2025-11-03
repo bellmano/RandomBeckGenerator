@@ -25,7 +25,7 @@ class BeckMovieGenerator {
         minRangeInput.addEventListener('input', () => this.validateInputs());
         maxRangeInput.addEventListener('input', () => this.validateInputs());
 
-        // Handle "Alla filmer" checkbox
+        // Handle "All movies" checkbox
         allMoviesCheckbox.addEventListener('change', () => {
             this.toggleAllMoviesMode();
             this.validateInputs();
@@ -69,7 +69,7 @@ class BeckMovieGenerator {
         const rangeSelector = document.getElementById('range-selector');
         
         if (allMoviesCheckbox.checked) {
-            // Dim the range selector when "Alla filmer" is checked
+            // Dim the range selector when "All movies" is checked
             rangeSelector.classList.add('dimmed');
         } else {
             // Enable range selector when unchecked
@@ -81,7 +81,7 @@ class BeckMovieGenerator {
         const allMoviesCheckbox = document.getElementById('all-movies-checkbox');
         const generateBtn = document.getElementById('generate-btn');
 
-        // If "Alla filmer" is checked, always allow generation
+        // If "All movies" is checked, always allow generation
         if (allMoviesCheckbox.checked) {
             generateBtn.disabled = false;
             generateBtn.style.opacity = '1';
