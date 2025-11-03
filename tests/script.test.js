@@ -93,6 +93,12 @@ describe('Main Script Tests', () => {
         mockElements.maxRange.value = '2';
         mockElements.minRange.dispatchEvent(new Event('input'));
         expect(mockElements.generateBtn.disabled).toBe(true);
+        
+        // Test maxRange input event with valid range
+        mockElements.minRange.value = '2';
+        mockElements.maxRange.value = '4';
+        mockElements.maxRange.dispatchEvent(new Event('input'));
+        expect(mockElements.generateBtn.disabled).toBe(false);
     });
 
     test('should handle all movies checkbox toggle', () => {
@@ -133,6 +139,8 @@ describe('Main Script Tests', () => {
         // Should not trigger when button disabled
         mockElements.minRange.value = '10';
         mockElements.minRange.dispatchEvent(new Event('input'));
+        mockElements.maxRange.value = '1';
+        mockElements.maxRange.dispatchEvent(new Event('input'));
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
         expect(clickSpy).toHaveBeenCalledTimes(0);
         
