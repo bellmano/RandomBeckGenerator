@@ -431,6 +431,11 @@ footer p {
         width: 100%;
     }
     
+    .movie-poster img {
+        object-fit: contain;
+        background-color: #0B0E13;
+    }
+    
     .movie-details {
         padding: 25px;
     }
@@ -463,6 +468,11 @@ footer p {
     
     .movie-poster {
         height: 350px;
+    }
+    
+    .movie-poster img {
+        object-fit: contain;
+        background-color: #0B0E13;
     }
     
     .movie-details {
