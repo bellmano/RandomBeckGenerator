@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 
-const dbPath = path.join(__dirname, '../data/beckDB.js');
+const dbPath = path.join(__dirname, '../database/beckDB.js');
 
 function extractRating(html) {
     // Try multiple patterns for IMDB rating extraction
