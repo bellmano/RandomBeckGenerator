@@ -214,10 +214,8 @@ class BeckMovieGenerator {
         }
 
         // Handle poster image loading
-        if (movie.posterUrl) {
-            movieImage.src = movie.posterUrl;
-            movieImage.alt = `Affisch för ${movie.title}`;
-        }
+        movieImage.src = `img/moviePosters/beck${movie.number}.png`;
+        movieImage.alt = `Affisch för ${movie.title}`;
 
         // Hide loading and error states
         this.hideLoading();

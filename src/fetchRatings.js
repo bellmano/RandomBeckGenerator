@@ -83,28 +83,31 @@ async function updateRatings() {
         if (movie.description) {
             result += `        description: "${movie.description.replaceAll('"', '\\"')}",\n`;
         }
-        result += `        imdbUrl: "${movie.imdbUrl}",\n`;
-        if (movie.tv4playUrl) {
-            result += `        tv4playUrl: "${movie.tv4playUrl}",\n`;
+        result += `        imdbUrl: "${movie.imdbUrl}"`;
+        
+        if (movie.tv4playUrl || movie.runtime || movie.imdbRating) {
+            result += ',';
         }
-        if (movie.posterUrl) {
-            result += `        posterUrl: "${movie.posterUrl}"`;
+        result += '\n';
+        
+        if (movie.tv4playUrl) {
+            result += `        tv4playUrl: "${movie.tv4playUrl}"`;
             if (movie.runtime || movie.imdbRating) {
                 result += ',';
             }
+            result += '\n';
         }
         if (movie.runtime) {
-            if (!movie.posterUrl) result += ',';
-            result += `\n        runtime: "${movie.runtime}"`;
+            result += `        runtime: "${movie.runtime}"`;
             if (movie.imdbRating) {
                 result += ',';
             }
+            result += '\n';
         }
         if (movie.imdbRating) {
-            if (!movie.posterUrl && !movie.runtime) result += ',';
-            result += `\n        imdbRating: "${movie.imdbRating}"`;
+            result += `        imdbRating: "${movie.imdbRating}"\n`;
         }
-        result += '\n    }';
+        result += '    }';
         return result;
     };
 
