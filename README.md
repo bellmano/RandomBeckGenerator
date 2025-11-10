@@ -42,8 +42,8 @@ This will execute the tests and generate a coverage report.
 
 ## :heart: Acknowledgments
 
-- Movie data and posters from TMDB and IMDb
-- Streaming links courtesy of TV4 Play
+- Movie data from IMDb
+- Streaming links from TV4 Play
 
 ## :mega: Issues or Suggestions
 Any issues or suggestions, please [create an issue on Github](https://github.com/bellmano/RandomBeckGenerator_website/issues).
