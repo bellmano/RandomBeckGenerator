@@ -1,5 +1,5 @@
 {
-  "name": "randombeckgenerator-website",
+  "name": "randombeckgenerator",
   "version": "1.0.0",
   "description": "A website that helps you choose a random Beck movie to watch. Perfect for when you can't decide which Beck film to enjoy!",
   "scripts": {
