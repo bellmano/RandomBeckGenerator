@@ -55,7 +55,7 @@ describe('fetchRatings.js', () => {
         number: 1,
         title: "Test Movie",
         year: 2020,
-        imdbUrl: "https://www.imdb.com/title/tt1234567/"
+        imdbUrl: "https://www.imdb.com/title/tt1234567"
     }
 ];`;
 
@@ -143,8 +143,8 @@ describe('fetchRatings.js', () => {
                 title: "Full",
                 year: 2020,
                 description: "desc",
-                imdbUrl: "https://imdb.com/title/tt1/",
-                tv4playUrl: "https://tv4.se/"
+                imdbUrl: "https://imdb.com/title/tt1",
+                tv4playUrl: "https://tv4play.se"
             }];`;
             fs.readFileSync.mockReturnValue(fullMovie);
             const writeFileSpy = jest.fn();
@@ -170,7 +170,7 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "Minimal",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/"
+                imdbUrl: "https://imdb.com/title/tt1"
             }];`;
             fs.readFileSync.mockReturnValue(minimalMovie);
             const writeFileSpy = jest.fn();
@@ -196,7 +196,7 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "Runtime Movie",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/",
+                imdbUrl: "https://imdb.com/title/tt1",
                 runtime: "90 min"
             }];`;
             fs.readFileSync.mockReturnValue(runtimeMovie);
@@ -222,7 +222,7 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "Only IMDB Movie",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/"
+                imdbUrl: "https://imdb.com/title/tt1"
             }];`;
             fs.readFileSync.mockReturnValue(onlyImdbMovie);
             const writeFileSpy = jest.fn();
@@ -247,7 +247,7 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "Runtime Only Movie",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/",
+                imdbUrl: "https://imdb.com/title/tt1",
                 runtime: "110 min"
             }];`;
             fs.readFileSync.mockReturnValue(runtimeOnlyMovie);
@@ -273,8 +273,8 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "TV4 Runtime Movie",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/",
-                tv4playUrl: "https://tv4.se/",
+                imdbUrl: "https://imdb.com/title/tt1",
+                tv4playUrl: "https://tv4play.se",
                 runtime: "95 min"
             }];`;
             fs.readFileSync.mockReturnValue(tv4RuntimeMovie);
@@ -291,7 +291,7 @@ describe('fetchRatings.js', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             const written = writeFileSpy.mock.calls[0][1];
-            expect(written).toContain('tv4playUrl: "https://tv4.se/",');
+            expect(written).toContain('tv4playUrl: "https://tv4play.se",');
             expect(written).toContain('runtime: "95 min"');
         });
 
@@ -300,8 +300,8 @@ describe('fetchRatings.js', () => {
                 number: 1,
                 title: "TV4 Only Movie",
                 year: 2020,
-                imdbUrl: "https://imdb.com/title/tt1/",
-                tv4playUrl: "https://tv4.se/"
+                imdbUrl: "https://imdb.com/title/tt1",
+                tv4playUrl: "https://tv4play.se"
             }];`;
             fs.readFileSync.mockReturnValue(tv4OnlyMovie);
             const writeFileSpy = jest.fn();
@@ -317,7 +317,7 @@ describe('fetchRatings.js', () => {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             const written = writeFileSpy.mock.calls[0][1];
-            expect(written).toContain('tv4playUrl: "https://tv4.se/"');
+            expect(written).toContain('tv4playUrl: "https://tv4play.se"');
             expect(written).not.toContain('runtime:');
             expect(written).not.toContain('imdbRating:');
         });
