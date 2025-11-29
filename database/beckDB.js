@@ -518,5 +518,15 @@ const beckMovies = [
         tv4playUrl: "https://www.tv4play.se/program/8e21ad7debd368a25066/beck-den-osynlige-mannen-52",
         runtime: "1h 30m",
         imdbRating: "5.8"
+    },
+    {
+        number: 53,
+        title: "Beck 53 - Ur askan",
+        year: 2025,
+        description: "x",
+        imdbUrl: "https://www.imdb.com/title/tt37828316",
+        tv4playUrl: "x",
+        runtime: "1h 30m",
+        imdbRating: "0.0"
     }
 ];
