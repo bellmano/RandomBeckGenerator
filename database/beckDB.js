@@ -518,5 +518,15 @@ const beckMovies = [
         tv4playUrl: "https://www.tv4play.se/program/8e21ad7debd368a25066/beck-den-osynlige-mannen-52",
         runtime: "1h 30m",
         imdbRating: "5.8"
+    },
+    {
+        number: 53,
+        title: "Beck 53 - Ur askan",
+        year: 2025,
+        description: "En pastor har omkommit i en mordbrand på en församlingsgård. När Alex och Josef kommer dit upptäcker hon en person från sitt förflutna.",
+        imdbUrl: "https://www.imdb.com/title/tt37828316",
+        tv4playUrl: "https://www.tv4play.se/program/77a79c143f8abbde3284/beck-ur-askan-53",
+        runtime: "1h 24m",
+        imdbRating: "0.0"
     }
 ];
