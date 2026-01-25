@@ -1,5 +1,8 @@
 # :cop::clapper: Random Beck Movie Generator
 
+![Total Page Views](https://umami-github-badges.vercel.app/api/views?website=ef1c982d-4d13-4428-a5b5-bf7c0eae4f84&token=api_O2dOgzOmyw1Y69y8HnngGdOtyoZ6N2Pi&range=all&style=for-the-badge&label=Total+Page+Views)
+![Average Session Duration on Website](https://umami-github-badges.vercel.app/api/avg-session?website=ef1c982d-4d13-4428-a5b5-bf7c0eae4f84&token=api_O2dOgzOmyw1Y69y8HnngGdOtyoZ6N2Pi&range=all&style=for-the-badge&label=Average+Session+Duration+on+Website)
+
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bellmano_RandomBeckGenerator&metric=coverage)](https://sonarcloud.io/summary/overall?id=bellmano_RandomBeckGenerator)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_RandomBeckGenerator&metric=security_rating)](https://sonarcloud.io/summary/overall?id=bellmano_RandomBeckGenerator)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bellmano_RandomBeckGenerator&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=bellmano_RandomBeckGenerator)
