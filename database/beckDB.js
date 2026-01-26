@@ -477,7 +477,7 @@ const beckMovies = [
         imdbUrl: "https://www.imdb.com/title/tt25405622",
         tv4playUrl: "https://www.tv4play.se/program/d4a87d9044f42db6f9fb/beck-quid-pro-quo-48",
         runtime: "1h 29m",
-        imdbRating: "6.1"
+        imdbRating: "6.0"
     },
     {
         number: 49,
