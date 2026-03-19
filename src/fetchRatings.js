@@ -1,6 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const { gunzipSync } = require('zlib');
+const fs = require('node:fs');
+const path = require('node:path');
+const { gunzipSync } = require('node:zlib');
+
+const escapedBackslash = String.raw`\\`;
 
 const dbPath = path.join(__dirname, '../database/beckDB.js');
 const ratingsDatasetUrl = 'https://datasets.imdbws.com/title.ratings.tsv.gz';
@@ -48,7 +50,7 @@ function parseRatingsDataset(datasetContent, requiredTitleIds) {
 
 async function fetchRatingsMap(requiredTitleIds, fetchImpl = globalThis.fetch) {
     if (typeof fetchImpl !== 'function') {
-        throw new Error('Fetch API is not available in this Node.js runtime.');
+        throw new TypeError('Fetch API is not available in this Node.js runtime.');
     }
 
     const response = await fetchImpl(ratingsDatasetUrl);
@@ -64,7 +66,7 @@ async function fetchRatingsMap(requiredTitleIds, fetchImpl = globalThis.fetch) {
 
 function escapeString(value) {
     return String(value)
-        .replaceAll('\\', '\\\\')
+    .replace(/\\/g, escapedBackslash)
         .replaceAll('"', '\\"');
 }
 
@@ -171,10 +173,14 @@ async function main(options) {
 
 /* istanbul ignore next */
 if (require.main === module) {
-    main().catch((error) => {
-        console.error('Unexpected error while updating ratings:', error);
-        process.exitCode = 1;
-    });
+    (async () => {
+        try {
+            await main();
+        } catch (error) {
+            console.error('Unexpected error while updating ratings:', error);
+            process.exitCode = 1;
+        }
+    })();
 }
 
 module.exports = {
