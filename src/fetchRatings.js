@@ -1,45 +1,145 @@
-// This script reads beckDB.js, fetches IMDB ratings for each imdbUrl, and updates the imdbRating field.
+const fs = require('node:fs');
+const path = require('node:path');
+const { gunzipSync } = require('node:zlib');
 
-const fs = require('fs');
-const path = require('path');
-const fetch = require('node-fetch');
+const backslash = String.fromCodePoint(92);
+const escapedBackslash = String.raw`\\`;
+const escapedQuote = String.raw`\"`;
 
 const dbPath = path.join(__dirname, '../database/beckDB.js');
+const ratingsDatasetUrl = 'https://datasets.imdbws.com/title.ratings.tsv.gz';
 
-function extractRating(html) {
-    // Try multiple patterns for IMDB rating extraction
-    const patterns = [
-        // New IMDB rating pattern - looks for rating/10 format
-        /(\d+\.\d)\/10/,
-        // Alternative pattern for span with rating value - made safer with possessive quantifier alternative
-        /<span[^>]{0,200}>(\d+\.\d)<\/span>/,
-        // Legacy patterns for backward compatibility
-        /<span class="sc-[a-z0-9]+-1[^"]*" data-testid="hero-rating-bar__aggregate-rating__score">(\d+\.\d)<\/span>/,
-        /<span itemprop="ratingValue">(\d+\.\d)<\/span>/,
-        // Additional pattern for rating display - limited backtracking
-        /IMDb RATING[^0-9]{0,50}(\d+\.\d)/i
-    ];
-    
-    for (const pattern of patterns) {
-        const match = html.match(pattern);
-        if (match && match[1]) {
-            return match[1];
-        }
+function parseMovies(movies) {
+    if (!Array.isArray(movies)) {
+        throw new TypeError('beckDB.js must export an array of movies.');
     }
-    return null;
+
+    return movies.map((movie) => ({ ...movie }));
 }
 
-async function updateRatings() {
-    let dbContent = fs.readFileSync(dbPath, 'utf8');
+function loadMoviesFromDb(dbFilePath = dbPath) {
+    delete require.cache[require.resolve(dbFilePath)];
+    const exportedMovies = require(dbFilePath);
+    return parseMovies(exportedMovies);
+}
+
+function extractTitleId(imdbUrl) {
+    const match = imdbUrl ? imdbUrl.match(/title\/(tt\d+)/) : null;
+    return match ? match[1] : null;
+}
+
+function parseRatingsDataset(datasetContent, requiredTitleIds) {
+    const ratingsByTitleId = new Map();
+
+    for (const line of datasetContent.split('\n').slice(1)) {
+        if (!line) {
+            continue;
+        }
+
+        const [titleId, averageRating] = line.split('\t');
+        if (!requiredTitleIds.has(titleId)) {
+            continue;
+        }
+
+        ratingsByTitleId.set(titleId, averageRating);
+        if (ratingsByTitleId.size === requiredTitleIds.size) {
+            break;
+        }
+    }
+
+    return ratingsByTitleId;
+}
+
+async function fetchRatingsMap(requiredTitleIds, fetchImpl = globalThis.fetch) {
+    if (typeof fetchImpl !== 'function') {
+        throw new TypeError('Fetch API is not available in this Node.js runtime.');
+    }
+
+    const response = await fetchImpl(ratingsDatasetUrl);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch IMDb ratings dataset: ${response.status} ${response.statusText}`.trim());
+    }
+
+    const compressedBuffer = Buffer.from(await response.arrayBuffer());
+    const datasetContent = gunzipSync(compressedBuffer).toString('utf8');
+
+    return parseRatingsDataset(datasetContent, requiredTitleIds);
+}
+
+function escapeString(value) {
+    return String(value)
+    .replaceAll(backslash, escapedBackslash)
+    .replaceAll('"', escapedQuote);
+}
+
+function formatMovie(movie) {
+    let result = '    {\n';
+    result += `        number: ${movie.number},\n`;
+    result += `        title: "${escapeString(movie.title)}",\n`;
+    result += `        year: ${movie.year},\n`;
+    if (movie.description) {
+        result += `        description: "${escapeString(movie.description)}",\n`;
+    }
+    result += `        imdbUrl: "${escapeString(movie.imdbUrl)}"`;
+
+    if (movie.tv4playUrl || movie.runtime || movie.imdbRating) {
+        result += ',';
+    }
+    result += '\n';
+
+    if (movie.tv4playUrl) {
+        result += `        tv4playUrl: "${escapeString(movie.tv4playUrl)}"`;
+        if (movie.runtime || movie.imdbRating) {
+            result += ',';
+        }
+        result += '\n';
+    }
+    if (movie.runtime) {
+        result += `        runtime: "${escapeString(movie.runtime)}"`;
+        if (movie.imdbRating) {
+            result += ',';
+        }
+        result += '\n';
+    }
+    if (movie.imdbRating) {
+        result += `        imdbRating: "${escapeString(movie.imdbRating)}"\n`;
+    }
+    result += '    }';
+    return result;
+}
+
+function serializeMovies(movies) {
+    return `const beckMovies = [\n${movies.map(formatMovie).join(',\n')}\n];\n`;
+}
+
+async function updateRatings(options = {}) {
+    const loadMovies = options.loadMovies || loadMoviesFromDb;
+    const writeFileSync = options.writeFileSync || fs.writeFileSync;
+    const fetchImpl = options.fetchImpl || globalThis.fetch;
+
     let movies;
     try {
-        dbContent = dbContent.replace(/const beckMovies = /, 'return ');
-        dbContent = dbContent.replace(/;\s*$/, '');
-        const parseFunction = new Function(dbContent);
-        movies = parseFunction();
-    } catch (e) {
-        console.error('Failed to parse beckDB.js:', e);
-        return;
+        movies = loadMovies(dbPath);
+    } catch (error) {
+        console.error('Failed to parse beckDB.js:', error);
+        return null;
+    }
+
+    const requiredTitleIds = new Set();
+    for (const movie of movies) {
+        const titleId = extractTitleId(movie.imdbUrl);
+        if (titleId) {
+            requiredTitleIds.add(titleId);
+        }
+    }
+
+    let ratingsByTitleId;
+    try {
+        console.log('Fetching latest IMDb ratings dataset...');
+        ratingsByTitleId = await fetchRatingsMap(requiredTitleIds, fetchImpl);
+    } catch (error) {
+        console.error('Failed to fetch IMDb ratings dataset:', error);
+        return null;
     }
 
     for (const movie of movies) {
@@ -47,74 +147,58 @@ async function updateRatings() {
             console.log(`No imdbUrl for: ${movie.title}`);
             continue;
         }
-        try {
-            console.log(`Fetching IMDB rating for: ${movie.title}`);
-            const res = await fetch(movie.imdbUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.5',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'DNT': '1',
-                    'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1'
-                }
-            });
-            const html = await res.text();
-            
-            const rating = extractRating(html);
-            if (rating) {
-                movie.imdbRating = rating;
-                console.log(`  -> Rating: ${rating}`);
-            } else {
-                console.log(`  -> Rating not found`);
-            }
-        } catch (err) {
-            console.log(`  -> Error fetching: ${err}`);
+
+        const titleId = extractTitleId(movie.imdbUrl);
+        if (!titleId) {
+            console.log(`Invalid imdbUrl for: ${movie.title}`);
+            continue;
+        }
+
+        console.log(`Updating IMDb rating for: ${movie.title}`);
+        const rating = ratingsByTitleId.get(titleId);
+        if (rating) {
+            movie.imdbRating = rating;
+            console.log(`  -> Rating: ${rating}`);
+        } else {
+            console.log('  -> Rating not found');
         }
     }
 
-    // Custom formatting to maintain original JavaScript object style (unquoted keys)
-    const formatMovie = (movie) => {
-        let result = '    {\n';
-        result += `        number: ${movie.number},\n`;
-        result += `        title: "${movie.title}",\n`;
-        result += `        year: ${movie.year},\n`;
-        if (movie.description) {
-            result += `        description: "${movie.description.replaceAll('"', '\\"')}",\n`;
-        }
-        result += `        imdbUrl: "${movie.imdbUrl}"`;
-        
-        if (movie.tv4playUrl || movie.runtime || movie.imdbRating) {
-            result += ',';
-        }
-        result += '\n';
-        
-        if (movie.tv4playUrl) {
-            result += `        tv4playUrl: "${movie.tv4playUrl}"`;
-            if (movie.runtime || movie.imdbRating) {
-                result += ',';
-            }
-            result += '\n';
-        }
-        if (movie.runtime) {
-            result += `        runtime: "${movie.runtime}"`;
-            if (movie.imdbRating) {
-                result += ',';
-            }
-            result += '\n';
-        }
-        if (movie.imdbRating) {
-            result += `        imdbRating: "${movie.imdbRating}"\n`;
-        }
-        result += '    }';
-        return result;
-    };
-
-    const formattedMovies = movies.map(formatMovie).join(',\n');
-    const newContent = `const beckMovies = [\n${formattedMovies}\n];\n`;
-    fs.writeFileSync(dbPath, newContent, 'utf8');
-    console.log('beckDB.js updated with latest IMDB ratings.');
+    writeFileSync(dbPath, serializeMovies(movies), 'utf8');
+    console.log('beckDB.js updated with latest IMDb ratings.');
+    return movies;
 }
 
-updateRatings();
+async function main(options) {
+    await updateRatings(options);
+}
+
+async function runMain(options) {
+    try {
+        await main(options);
+    } catch (error) {
+        console.error('Unexpected error while updating ratings:', error);
+        process.exitCode = 1;
+    }
+}
+
+/* istanbul ignore next */
+if (require.main === module) {
+    void main().catch((error) => {
+        console.error('Unexpected error while updating ratings:', error);
+        process.exitCode = 1;
+    });
+}
+
+module.exports = {
+    extractTitleId,
+    fetchRatingsMap,
+    formatMovie,
+    loadMoviesFromDb,
+    main,
+    parseMovies,
+    parseRatingsDataset,
+    runMain,
+    serializeMovies,
+    updateRatings
+};
