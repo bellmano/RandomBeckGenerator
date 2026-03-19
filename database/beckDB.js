@@ -529,7 +529,7 @@ const beckMovies = [
         runtime: "1h 24m",
         imdbRating: "5.1"
     },
-        {
+    {
         number: 54,
         title: "Beck 54 - I skuggorna",
         year: 2026,
