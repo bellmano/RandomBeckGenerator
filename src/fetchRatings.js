@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { gunzipSync } = require('node:zlib');
 
-const backslash = String.fromCharCode(92);
+const backslash = String.fromCodePoint(92);
 const escapedBackslash = String.raw`\\`;
 const escapedQuote = String.raw`\"`;
 
@@ -184,7 +184,10 @@ async function runMain(options) {
 
 /* istanbul ignore next */
 if (require.main === module) {
-    runMain();
+    void main().catch((error) => {
+        console.error('Unexpected error while updating ratings:', error);
+        process.exitCode = 1;
+    });
 }
 
 module.exports = {
