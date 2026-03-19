@@ -5,6 +5,13 @@ const { gunzipSync } = require('node:zlib');
 const backslash = String.fromCodePoint(92);
 const escapedBackslash = String.raw`\\`;
 const escapedQuote = String.raw`\"`;
+const dbFooter = [
+    '',
+    "if (typeof module !== 'undefined' && module.exports) {",
+    '    module.exports = beckMovies;',
+    '}',
+    ''
+].join('\n');
 
 const dbPath = path.join(__dirname, '../database/beckDB.js');
 const ratingsDatasetUrl = 'https://datasets.imdbws.com/title.ratings.tsv.gz';
@@ -109,7 +116,7 @@ function formatMovie(movie) {
 }
 
 function serializeMovies(movies) {
-    return `const beckMovies = [\n${movies.map(formatMovie).join(',\n')}\n];\n`;
+    return `const beckMovies = [\n${movies.map(formatMovie).join(',\n')}\n];\n${dbFooter}`;
 }
 
 async function updateRatings(options = {}) {

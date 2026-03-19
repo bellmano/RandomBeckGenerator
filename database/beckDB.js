@@ -507,7 +507,7 @@ const beckMovies = [
         imdbUrl: "https://www.imdb.com/title/tt31170265",
         tv4playUrl: "https://www.tv4play.se/program/7e4f84f9836421086dc2/beck-vilhelm-51",
         runtime: "1h 29m",
-        imdbRating: "5.9"
+        imdbRating: "5.6"
     },
     {
         number: 52,
@@ -540,3 +540,7 @@ const beckMovies = [
         imdbRating: "0.0"
     }
 ];
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = beckMovies;
+}

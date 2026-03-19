@@ -156,6 +156,10 @@ describe('fetchRatings.js', () => {
             '        imdbUrl: "https://www.imdb.com/title/tt1"',
             '    }',
             '];',
+            '',
+            "if (typeof module !== 'undefined' && module.exports) {",
+            '    module.exports = beckMovies;',
+            '}',
             ''
         ].join('\n'));
     });
@@ -228,6 +232,7 @@ describe('fetchRatings.js', () => {
         expect(movies[1].imdbRating).toBeUndefined();
         expect(loadMovies).toHaveBeenCalledTimes(1);
         expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "7.5"'), 'utf8');
+        expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('module.exports = beckMovies;'), 'utf8');
         expect(consoleLogSpy).toHaveBeenCalledWith('Fetching latest IMDb ratings dataset...');
         expect(consoleLogSpy).toHaveBeenCalledWith('Updating IMDb rating for: Rated Movie');
         expect(consoleLogSpy).toHaveBeenCalledWith('  -> Rating: 7.5');
