@@ -2,7 +2,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { gunzipSync } = require('node:zlib');
 
+const backslash = String.fromCharCode(92);
 const escapedBackslash = String.raw`\\`;
+const escapedQuote = String.raw`\"`;
 
 const dbPath = path.join(__dirname, '../database/beckDB.js');
 const ratingsDatasetUrl = 'https://datasets.imdbws.com/title.ratings.tsv.gz';
@@ -66,8 +68,8 @@ async function fetchRatingsMap(requiredTitleIds, fetchImpl = globalThis.fetch) {
 
 function escapeString(value) {
     return String(value)
-    .replace(/\\/g, escapedBackslash)
-        .replaceAll('"', '\\"');
+    .replaceAll(backslash, escapedBackslash)
+    .replaceAll('"', escapedQuote);
 }
 
 function formatMovie(movie) {
@@ -171,16 +173,18 @@ async function main(options) {
     await updateRatings(options);
 }
 
+async function runMain(options) {
+    try {
+        await main(options);
+    } catch (error) {
+        console.error('Unexpected error while updating ratings:', error);
+        process.exitCode = 1;
+    }
+}
+
 /* istanbul ignore next */
 if (require.main === module) {
-    (async () => {
-        try {
-            await main();
-        } catch (error) {
-            console.error('Unexpected error while updating ratings:', error);
-            process.exitCode = 1;
-        }
-    })();
+    runMain();
 }
 
 module.exports = {
@@ -191,6 +195,7 @@ module.exports = {
     main,
     parseMovies,
     parseRatingsDataset,
+    runMain,
     serializeMovies,
     updateRatings
 };

@@ -10,6 +10,7 @@ const {
     main,
     parseMovies,
     parseRatingsDataset,
+    runMain,
     serializeMovies,
     updateRatings
 } = require('../src/fetchRatings.js');
@@ -308,5 +309,42 @@ describe('fetchRatings.js', () => {
         expect(writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "6.8"'), 'utf8');
 
         globalThis.fetch = originalFetch;
+    });
+
+    test('runMain delegates to main when no unexpected error occurs', async () => {
+        const loadMovies = jest.fn().mockReturnValue([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt100' }]);
+        const writeFileSync = jest.fn();
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = jest.fn().mockResolvedValue(createDatasetResponse([
+            'tconst\taverageRating\tnumVotes',
+            'tt100\t7.1\t710'
+        ].join('\n')));
+
+        await runMain({ loadMovies, writeFileSync });
+
+        expect(writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "7.1"'), 'utf8');
+        expect(consoleErrorSpy).not.toHaveBeenCalledWith('Unexpected error while updating ratings:', expect.any(Error));
+
+        globalThis.fetch = originalFetch;
+    });
+
+    test('runMain reports unexpected errors and sets exitCode', async () => {
+        const originalExitCode = process.exitCode;
+
+        await runMain({
+            loadMovies: jest.fn().mockReturnValue([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt101' }]),
+            writeFileSync: jest.fn(() => {
+                throw new Error('disk full');
+            }),
+            fetchImpl: jest.fn().mockResolvedValue(createDatasetResponse([
+                'tconst\taverageRating\tnumVotes',
+                'tt101\t7.9\t790'
+            ].join('\n')))
+        });
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Unexpected error while updating ratings:', expect.any(Error));
+        expect(process.exitCode).toBe(1);
+
+        process.exitCode = originalExitCode;
     });
 });
