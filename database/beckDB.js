@@ -528,5 +528,15 @@ const beckMovies = [
         tv4playUrl: "https://www.tv4play.se/program/77a79c143f8abbde3284/beck-ur-askan-53",
         runtime: "1h 24m",
         imdbRating: "5.1"
+    },
+    {
+        number: 54,
+        title: "Beck 54 - I skuggorna",
+        year: 2026,
+        description: "När ett gäng misstänks för en dödsskjutning i en Stockholmsförort inleder Beck-gruppen en gränsöverskridande insats för att hitta gängets ledare.",
+        imdbUrl: "https://www.imdb.com/title/tt39284948",
+        tv4playUrl: "https://www.tv4play.se/program/b8164fcb65377305a30d/beck-i-skuggorna-54",
+        runtime: "1h 27m",
+        imdbRating: "0.0"
     }
 ];
