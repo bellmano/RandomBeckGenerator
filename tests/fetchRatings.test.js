@@ -6,6 +6,7 @@ const {
     extractTitleId,
     fetchRatingsMap,
     formatMovie,
+    loadMoviesFromDb,
     main,
     parseMovies,
     parseRatingsDataset,
@@ -50,10 +51,30 @@ describe('fetchRatings.js', () => {
         expect(extractTitleId('https://www.imdb.com/name/nm0000001')).toBeNull();
     });
 
-    test('parseMovies evaluates the beckDB content', () => {
-        const movies = parseMovies('const beckMovies = [{ number: 1, title: "Movie", year: 2020, imdbUrl: "https://www.imdb.com/title/tt1" }];');
+    test('parseMovies clones an exported movie array', () => {
+        const movies = parseMovies([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt1' }]);
         expect(movies).toHaveLength(1);
         expect(movies[0].title).toBe('Movie');
+        expect(movies[0]).not.toBeUndefined();
+    });
+
+    test('parseMovies throws when the database export is not an array', () => {
+        expect(() => parseMovies({ title: 'Movie' })).toThrow('beckDB.js must export an array of movies.');
+    });
+
+    test('loadMoviesFromDb reads the exported database module', () => {
+        const movies = loadMoviesFromDb(require.resolve('../database/beckDB.js'));
+
+        expect(Array.isArray(movies)).toBe(true);
+        expect(movies.length).toBeGreaterThan(0);
+        expect(movies[0]).toHaveProperty('title');
+    });
+
+    test('loadMoviesFromDb uses the default database path when no path is provided', () => {
+        const movies = loadMoviesFromDb();
+
+        expect(Array.isArray(movies)).toBe(true);
+        expect(movies.length).toBeGreaterThan(0);
     });
 
     test('parseRatingsDataset filters to the required title ids', () => {
@@ -167,44 +188,44 @@ describe('fetchRatings.js', () => {
     });
 
     test('updateRatings handles the complete flow with mixed movie states', async () => {
-        fs.readFileSync.mockReturnValue(`const beckMovies = [
-    {
-        number: 1,
-        title: "Rated Movie",
-        year: 2020,
-        imdbUrl: "https://www.imdb.com/title/tt1234567",
-        runtime: "90 min"
-    },
-    {
-        number: 2,
-        title: "Missing Rating",
-        year: 2021,
-        imdbUrl: "https://www.imdb.com/title/tt7654321"
-    },
-    {
-        number: 3,
-        title: "Invalid URL",
-        year: 2022,
-        imdbUrl: "https://www.imdb.com/name/nm1234567"
-    },
-    {
-        number: 4,
-        title: "No URL",
-        year: 2023
-    }
-];`);
         fs.writeFileSync.mockImplementation(() => {});
+        const loadMovies = jest.fn().mockReturnValue([
+            {
+                number: 1,
+                title: 'Rated Movie',
+                year: 2020,
+                imdbUrl: 'https://www.imdb.com/title/tt1234567',
+                runtime: '90 min'
+            },
+            {
+                number: 2,
+                title: 'Missing Rating',
+                year: 2021,
+                imdbUrl: 'https://www.imdb.com/title/tt7654321'
+            },
+            {
+                number: 3,
+                title: 'Invalid URL',
+                year: 2022,
+                imdbUrl: 'https://www.imdb.com/name/nm1234567'
+            },
+            {
+                number: 4,
+                title: 'No URL',
+                year: 2023
+            }
+        ]);
 
         const fetchImpl = jest.fn().mockResolvedValue(createDatasetResponse([
             'tconst\taverageRating\tnumVotes',
             'tt1234567\t7.5\t1200'
         ].join('\n')));
 
-        const movies = await updateRatings({ fetchImpl });
+        const movies = await updateRatings({ fetchImpl, loadMovies });
 
         expect(movies[0].imdbRating).toBe('7.5');
         expect(movies[1].imdbRating).toBeUndefined();
-        expect(fs.readFileSync).toHaveBeenCalled();
+        expect(loadMovies).toHaveBeenCalledTimes(1);
         expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "7.5"'), 'utf8');
         expect(consoleLogSpy).toHaveBeenCalledWith('Fetching latest IMDb ratings dataset...');
         expect(consoleLogSpy).toHaveBeenCalledWith('Updating IMDb rating for: Rated Movie');
@@ -217,29 +238,29 @@ describe('fetchRatings.js', () => {
     });
 
     test('updateRatings returns null on parse error', async () => {
-        fs.readFileSync.mockImplementation(() => {
+        const loadMovies = jest.fn().mockImplementation(() => {
             throw new Error('bad parse');
         });
 
-        const result = await updateRatings({ fetchImpl: jest.fn() });
+        const result = await updateRatings({ fetchImpl: jest.fn(), loadMovies });
 
         expect(result).toBeNull();
         expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to parse beckDB.js:', expect.any(Error));
     });
 
     test('updateRatings returns null when fetching the dataset fails', async () => {
-        fs.readFileSync.mockReturnValue('const beckMovies = [{ number: 1, title: "Movie", year: 2020, imdbUrl: "https://www.imdb.com/title/tt1" }];');
+        const loadMovies = jest.fn().mockReturnValue([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt1' }]);
 
         const fetchImpl = jest.fn().mockRejectedValue(new Error('network down'));
-        const result = await updateRatings({ fetchImpl });
+        const result = await updateRatings({ fetchImpl, loadMovies });
 
         expect(result).toBeNull();
         expect(fs.writeFileSync).not.toHaveBeenCalled();
         expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to fetch IMDb ratings dataset:', expect.any(Error));
     });
 
-    test('updateRatings supports injected file functions and default global fetch', async () => {
-        const readFileSync = jest.fn().mockReturnValue('const beckMovies = [{ number: 1, title: "Movie", year: 2020, imdbUrl: "https://www.imdb.com/title/tt42" }];');
+    test('updateRatings supports injected movie loading and default global fetch', async () => {
+        const loadMovies = jest.fn().mockReturnValue([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt42' }]);
         const writeFileSync = jest.fn();
         const originalFetch = globalThis.fetch;
         globalThis.fetch = jest.fn().mockResolvedValue(createDatasetResponse([
@@ -247,27 +268,44 @@ describe('fetchRatings.js', () => {
             'tt42\t8.4\t4200'
         ].join('\n')));
 
-        const result = await updateRatings({ readFileSync, writeFileSync });
+        const result = await updateRatings({ loadMovies, writeFileSync });
 
         expect(result[0].imdbRating).toBe('8.4');
-        expect(readFileSync).toHaveBeenCalledTimes(1);
+        expect(loadMovies).toHaveBeenCalledTimes(1);
         expect(writeFileSync).toHaveBeenCalledTimes(1);
 
         globalThis.fetch = originalFetch;
     });
 
-    test('main delegates to updateRatings', async () => {
-        fs.readFileSync.mockReturnValue('const beckMovies = [{ number: 1, title: "Movie", year: 2020, imdbUrl: "https://www.imdb.com/title/tt99" }];');
+    test('updateRatings uses the default database loader when no loader is injected', async () => {
         fs.writeFileSync.mockImplementation(() => {});
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = jest.fn().mockResolvedValue(createDatasetResponse([
+            'tconst\taverageRating\tnumVotes',
+            'tt0118693\t6.2\t1952'
+        ].join('\n')));
+
+        const result = await updateRatings();
+
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBeGreaterThan(0);
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+
+        globalThis.fetch = originalFetch;
+    });
+
+    test('main delegates to updateRatings', async () => {
+        const loadMovies = jest.fn().mockReturnValue([{ number: 1, title: 'Movie', year: 2020, imdbUrl: 'https://www.imdb.com/title/tt99' }]);
+        const writeFileSync = jest.fn();
         const originalFetch = globalThis.fetch;
         globalThis.fetch = jest.fn().mockResolvedValue(createDatasetResponse([
             'tconst\taverageRating\tnumVotes',
             'tt99\t6.8\t680'
         ].join('\n')));
 
-        await main();
+        await main({ loadMovies, writeFileSync });
 
-        expect(fs.writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "6.8"'), 'utf8');
+        expect(writeFileSync).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('imdbRating: "6.8"'), 'utf8');
 
         globalThis.fetch = originalFetch;
     });

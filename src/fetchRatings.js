@@ -5,12 +5,18 @@ const { gunzipSync } = require('zlib');
 const dbPath = path.join(__dirname, '../database/beckDB.js');
 const ratingsDatasetUrl = 'https://datasets.imdbws.com/title.ratings.tsv.gz';
 
-function parseMovies(dbContent) {
-    const executableContent = dbContent
-        .replace(/const beckMovies = /, 'return ')
-        .replace(/;\s*$/, '');
+function parseMovies(movies) {
+    if (!Array.isArray(movies)) {
+        throw new TypeError('beckDB.js must export an array of movies.');
+    }
 
-    return new Function(executableContent)();
+    return movies.map((movie) => ({ ...movie }));
+}
+
+function loadMoviesFromDb(dbFilePath = dbPath) {
+    delete require.cache[require.resolve(dbFilePath)];
+    const exportedMovies = require(dbFilePath);
+    return parseMovies(exportedMovies);
 }
 
 function extractTitleId(imdbUrl) {
@@ -103,13 +109,13 @@ function serializeMovies(movies) {
 }
 
 async function updateRatings(options = {}) {
-    const readFileSync = options.readFileSync || fs.readFileSync;
+    const loadMovies = options.loadMovies || loadMoviesFromDb;
     const writeFileSync = options.writeFileSync || fs.writeFileSync;
     const fetchImpl = options.fetchImpl || globalThis.fetch;
 
     let movies;
     try {
-        movies = parseMovies(readFileSync(dbPath, 'utf8'));
+        movies = loadMovies(dbPath);
     } catch (error) {
         console.error('Failed to parse beckDB.js:', error);
         return null;
@@ -159,8 +165,8 @@ async function updateRatings(options = {}) {
     return movies;
 }
 
-async function main() {
-    await updateRatings();
+async function main(options) {
+    await updateRatings(options);
 }
 
 /* istanbul ignore next */
@@ -175,6 +181,7 @@ module.exports = {
     extractTitleId,
     fetchRatingsMap,
     formatMovie,
+    loadMoviesFromDb,
     main,
     parseMovies,
     parseRatingsDataset,

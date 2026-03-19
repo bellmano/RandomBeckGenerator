@@ -540,3 +540,7 @@ const beckMovies = [
         imdbRating: "0.0"
     }
 ];
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = beckMovies;
+}
