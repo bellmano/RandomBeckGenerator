@@ -3,10 +3,8 @@ on:
   schedule:
     - cron: '0 2 * * 1' # Runs every Monday at 02:00 UTC
   workflow_dispatch:
-permissions:
-  contents: write
-  pages: write
-  id-token: write
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: "pages"
@@ -14,19 +12,22 @@ concurrency:
 jobs:
   fetch-ratings:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
+          node-version: '24'
+          cache: 'npm'
       - name: Install dependencies
-        run: npm install node-fetch@2
+        run: npm ci
       - name: Run fetchRatings script
-        run: node src/fetchRatings.js
+        run: npm run fetch:ratings
       - name: Commit and push changes
         run: |
           git config --local user.name 'github-actions[bot]'
@@ -43,9 +44,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: fetch-ratings
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
       - name: Setup Pages
@@ -56,7 +61,7 @@ jobs:
           source: ./
           destination: ./_site
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
 
   # Deployment job
   deploy:
@@ -65,6 +70,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
