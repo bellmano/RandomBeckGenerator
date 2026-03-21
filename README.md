@@ -45,8 +45,8 @@ This will execute the tests and generate a coverage report.
 
 ## :heart: Acknowledgments
 
-- Movie data from IMDb
-- Streaming links from TV4 Play
+- Movie rating from IMDb
+- Movie data and streaming links from TV4 Play
 
 ## :handshake: Contributing
 
