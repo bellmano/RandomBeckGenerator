@@ -8,7 +8,7 @@
     "fetch:ratings": "node src/fetchRatings.js"
   },
   "devDependencies": {
-    "jest": "^30.4.2",
+    "jest": "^30.5.0",
     "jest-environment-jsdom": "^30.5.0"
   },
   "jest": {
