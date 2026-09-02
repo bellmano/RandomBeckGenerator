@@ -332,7 +332,8 @@ main {
 }
 
 .error {
-    background-color: rgba(220, 38, 127, 0.1);
+    /* opaque equivalent of rgba(220, 38, 127, 0.1) over the #0B0E13 page background */
+    background-color: #20101E;
     border: 2px solid rgba(220, 38, 127, 0.3);
     color: #ff6b9d;
     padding: 30px;
@@ -393,7 +394,8 @@ footer p {
 .linkedin-link:hover {
     color: #3BA3E5;
     transform: translateY(-2px);
-    background-color: rgba(59, 163, 229, 0.1);
+    /* opaque equivalent of rgba(59, 163, 229, 0.1) over the #0B0E13 page background */
+    background-color: #101D28;
 }
 
 .github-icon,
