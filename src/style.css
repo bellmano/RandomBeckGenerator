@@ -151,7 +151,7 @@ main {
 }
 
 .generate-button {
-    background: linear-gradient(135deg, #3BA3E5, #2E8BC7);
+    background: linear-gradient(135deg, #287DB0, #2475A7);
     color: white;
     border: none;
     padding: 16px 32px;
@@ -165,7 +165,7 @@ main {
 }
 
 .generate-button:hover {
-    background: linear-gradient(135deg, #2E8BC7, #2574A8);
+    background: linear-gradient(135deg, #2475A7, #206A99);
     transform: translateY(-2px);
     box-shadow: 0 6px 24px rgba(59, 163, 229, 0.4);
 }
