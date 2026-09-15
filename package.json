@@ -5,11 +5,14 @@
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "fetch:ratings": "node src/fetchRatings.js"
   },
   "devDependencies": {
     "jest": "^30.5.1",
-    "jest-environment-jsdom": "^30.5.1"
+    "jest-environment-jsdom": "^30.5.1",
+    "prettier": "^3.9.6"
   },
   "jest": {
     "testEnvironment": "jsdom",
@@ -18,7 +21,11 @@
       "src/fetchRatings.js"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["text", "lcov", "html"],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/tests/"
