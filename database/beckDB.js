@@ -537,7 +537,7 @@ const beckMovies = [
         imdbUrl: "https://imdb.com/title/tt39284948",
         tv4playUrl: "https://tv4play.se/program/b8164fcb65377305a30d/beck-i-skuggorna-54",
         runtime: "1h 27m",
-        imdbRating: "6.2"
+        imdbRating: "6.3"
     }
 ];
 
