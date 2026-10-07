@@ -22,15 +22,23 @@ The idea for this project came from the podcast TuttoBalutto, where the hosts jo
 - Lightweight website deployed though GitHub pages with a custom domain
 - A scheduled IMDb rating fetcher that runs every Monday night to get correct IMDb ratings for each film
 
-## :test_tube: Running Tests
+## :test_tube: Local Development and Testing
 
-To run the tests and view coverage:
+To run the website locally:
 
-1. Install the required dev dependency:
+1. Install the dependencies:
    ```powershell
    npm install
    ```
-2. Run the test coverage script:
+2. Start the development server:
+   ```powershell
+   npm run dev
+   ```
+3. Open the local URL printed in the terminal.
+
+To run the tests and view coverage:
+
+1. Run the test coverage script:
    ```powershell
    npm run test:coverage
    ```
