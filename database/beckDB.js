@@ -527,7 +527,7 @@ const beckMovies = [
         imdbUrl: "https://imdb.com/title/tt37828316",
         tv4playUrl: "https://tv4play.se/program/77a79c143f8abbde3284/beck-ur-askan-53",
         runtime: "1h 24m",
-        imdbRating: "5.2"
+        imdbRating: "5.3"
     },
     {
         number: 54,
