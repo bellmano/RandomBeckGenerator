@@ -3,6 +3,7 @@ class BeckMovieGenerator {
     this.movies = beckMovies;
     this.initializeEventListeners();
     this.initializeRangeValues();
+    this.toggleAllMoviesMode();
     this.updateRangeSelector();
   }
 
