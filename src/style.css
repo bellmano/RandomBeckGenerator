@@ -85,7 +85,10 @@ main {
   border-radius: 4px;
   margin-right: 10px;
   position: relative;
-  transition: all 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .checkbox-container:hover .checkmark {
@@ -117,7 +120,9 @@ main {
   gap: 15px;
   margin-bottom: 30px;
   flex-wrap: wrap;
-  transition: all 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .range-selector.dimmed {
@@ -141,7 +146,9 @@ main {
   font-size: 1rem;
   width: 80px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .range-selector input:focus {
@@ -159,7 +166,10 @@ main {
   font-weight: 600;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   width: 100%;
   box-shadow: 0 4px 16px rgba(59, 163, 229, 0.3);
 }
@@ -184,7 +194,9 @@ main {
   max-width: 800px;
   display: flex;
   border: 1px solid rgba(59, 163, 229, 0.1);
-  transition: all 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .movie-card:hover {
@@ -278,7 +290,10 @@ main {
   align-items: center;
   padding: 12px 24px;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   box-shadow: 0 4px 12px rgba(230, 0, 38, 0.3);
   border: none;
   cursor: pointer;
@@ -386,7 +401,10 @@ footer p {
 .github-link,
 .linkedin-link {
   color: #9aa2b1;
-  transition: all 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease,
+    background-color 0.3s ease;
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -406,12 +424,35 @@ footer p {
 .linkedin-icon {
   width: 20px;
   height: 20px;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .github-link:hover .github-icon,
 .linkedin-link:hover .linkedin-icon {
   transform: scale(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .checkbox-container:hover .checkmark,
+  .range-selector.dimmed,
+  .generate-button:hover,
+  .generate-button:active,
+  .movie-card:hover,
+  .movie-link:hover,
+  .movie-link:active,
+  .github-link:hover,
+  .linkedin-link:hover,
+  .github-link:hover .github-icon,
+  .linkedin-link:hover .linkedin-icon {
+    transform: none;
+  }
 }
 
 /* Mobile Responsiveness */
