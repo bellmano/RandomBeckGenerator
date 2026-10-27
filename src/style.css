@@ -433,11 +433,21 @@ footer p {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
+  .spinner {
+    animation: none;
+  }
+
+  .checkmark,
+  .range-selector,
+  .range-selector input,
+  .generate-button,
+  .movie-card,
+  .movie-link,
+  .github-link,
+  .linkedin-link,
+  .github-icon,
+  .linkedin-icon {
+    transition: none;
   }
 
   .checkbox-container:hover .checkmark,
