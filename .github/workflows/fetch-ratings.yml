@@ -25,7 +25,7 @@ jobs:
           node-version: "24"
           cache: "npm"
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Run fetchRatings script
         run: npm run fetch:ratings
       - name: Commit and push changes

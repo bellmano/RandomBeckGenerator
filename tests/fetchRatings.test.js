@@ -1,8 +1,7 @@
-jest.mock("fs");
-
-const fs = require("fs");
-const { gzipSync } = require("zlib");
-const {
+import fs from "node:fs";
+import { gzipSync } from "node:zlib";
+import path from "node:path";
+import {
   extractTitleId,
   fetchRatingsMap,
   formatMovie,
@@ -13,7 +12,7 @@ const {
   runMain,
   serializeMovies,
   updateRatings,
-} = require("../src/fetchRatings.js");
+} from "../src/fetchRatings.js";
 
 function createDatasetResponse(datasetContent, overrides = {}) {
   const compressed = gzipSync(datasetContent);
@@ -21,7 +20,7 @@ function createDatasetResponse(datasetContent, overrides = {}) {
     ok: true,
     status: 200,
     statusText: "OK",
-    arrayBuffer: jest
+    arrayBuffer: vi
       .fn()
       .mockResolvedValue(
         compressed.buffer.slice(
@@ -38,9 +37,9 @@ describe("fetchRatings.js", () => {
   let consoleErrorSpy;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    vi.clearAllMocks();
+    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -80,7 +79,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("loadMoviesFromDb reads the exported database module", () => {
-    const movies = loadMoviesFromDb(require.resolve("../database/beckDB.js"));
+    const movies = loadMoviesFromDb(path.resolve("database/beckDB.js"));
 
     expect(Array.isArray(movies)).toBe(true);
     expect(movies.length).toBeGreaterThan(0);
@@ -123,7 +122,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("fetchRatingsMap parses the gzipped dataset response", async () => {
-    const fetchImpl = jest
+    const fetchImpl = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -151,7 +150,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("fetchRatingsMap throws when the dataset request fails", async () => {
-    const fetchImpl = jest.fn().mockResolvedValue({
+    const fetchImpl = vi.fn().mockResolvedValue({
       ok: false,
       status: 503,
       statusText: "Service Unavailable",
@@ -239,8 +238,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("updateRatings handles the complete flow with mixed movie states", async () => {
-    fs.writeFileSync.mockImplementation(() => {});
-    const loadMovies = jest.fn().mockReturnValue([
+    const loadMovies = vi.fn().mockReturnValue([
       {
         number: 1,
         title: "Rated Movie",
@@ -267,7 +265,7 @@ describe("fetchRatings.js", () => {
       },
     ]);
 
-    const fetchImpl = jest
+    const fetchImpl = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -276,18 +274,23 @@ describe("fetchRatings.js", () => {
           ),
         ),
       );
+    const writeFileSync = vi.fn();
 
-    const movies = await updateRatings({ fetchImpl, loadMovies });
+    const movies = await updateRatings({
+      fetchImpl,
+      loadMovies,
+      writeFileSync,
+    });
 
     expect(movies[0].imdbRating).toBe("7.5");
     expect(movies[1].imdbRating).toBeUndefined();
     expect(loadMovies).toHaveBeenCalledTimes(1);
-    expect(fs.writeFileSync).toHaveBeenCalledWith(
+    expect(writeFileSync).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining('imdbRating: "7.5"'),
       "utf8",
     );
-    expect(fs.writeFileSync).toHaveBeenCalledWith(
+    expect(writeFileSync).toHaveBeenCalledWith(
       expect.any(String),
       expect.stringContaining("module.exports = beckMovies;"),
       "utf8",
@@ -313,11 +316,11 @@ describe("fetchRatings.js", () => {
   });
 
   test("updateRatings returns null on parse error", async () => {
-    const loadMovies = jest.fn().mockImplementation(() => {
+    const loadMovies = vi.fn().mockImplementation(() => {
       throw new Error("bad parse");
     });
 
-    const result = await updateRatings({ fetchImpl: jest.fn(), loadMovies });
+    const result = await updateRatings({ fetchImpl: vi.fn(), loadMovies });
 
     expect(result).toBeNull();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -327,7 +330,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("updateRatings returns null when fetching the dataset fails", async () => {
-    const loadMovies = jest.fn().mockReturnValue([
+    const loadMovies = vi.fn().mockReturnValue([
       {
         number: 1,
         title: "Movie",
@@ -336,11 +339,16 @@ describe("fetchRatings.js", () => {
       },
     ]);
 
-    const fetchImpl = jest.fn().mockRejectedValue(new Error("network down"));
-    const result = await updateRatings({ fetchImpl, loadMovies });
+    const fetchImpl = vi.fn().mockRejectedValue(new Error("network down"));
+    const writeFileSync = vi.fn();
+    const result = await updateRatings({
+      fetchImpl,
+      loadMovies,
+      writeFileSync,
+    });
 
     expect(result).toBeNull();
-    expect(fs.writeFileSync).not.toHaveBeenCalled();
+    expect(writeFileSync).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Failed to fetch IMDb ratings dataset:",
       expect.any(Error),
@@ -348,7 +356,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("updateRatings supports injected movie loading and default global fetch", async () => {
-    const loadMovies = jest.fn().mockReturnValue([
+    const loadMovies = vi.fn().mockReturnValue([
       {
         number: 1,
         title: "Movie",
@@ -356,9 +364,9 @@ describe("fetchRatings.js", () => {
         imdbUrl: "https://imdb.com/title/tt42",
       },
     ]);
-    const writeFileSync = jest.fn();
+    const writeFileSync = vi.fn();
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = jest
+    globalThis.fetch = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -376,9 +384,11 @@ describe("fetchRatings.js", () => {
   });
 
   test("updateRatings uses the default database loader when no loader is injected", async () => {
-    fs.writeFileSync.mockImplementation(() => {});
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = jest
+    const writeFileSyncSpy = vi
+      .spyOn(fs, "writeFileSync")
+      .mockImplementation(() => {});
+    globalThis.fetch = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -392,13 +402,14 @@ describe("fetchRatings.js", () => {
 
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+    expect(writeFileSyncSpy).toHaveBeenCalledTimes(1);
 
     globalThis.fetch = originalFetch;
+    writeFileSyncSpy.mockRestore();
   });
 
   test("main delegates to updateRatings", async () => {
-    const loadMovies = jest.fn().mockReturnValue([
+    const loadMovies = vi.fn().mockReturnValue([
       {
         number: 1,
         title: "Movie",
@@ -406,9 +417,9 @@ describe("fetchRatings.js", () => {
         imdbUrl: "https://imdb.com/title/tt99",
       },
     ]);
-    const writeFileSync = jest.fn();
+    const writeFileSync = vi.fn();
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = jest
+    globalThis.fetch = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -428,7 +439,7 @@ describe("fetchRatings.js", () => {
   });
 
   test("runMain delegates to main when no unexpected error occurs", async () => {
-    const loadMovies = jest.fn().mockReturnValue([
+    const loadMovies = vi.fn().mockReturnValue([
       {
         number: 1,
         title: "Movie",
@@ -436,9 +447,9 @@ describe("fetchRatings.js", () => {
         imdbUrl: "https://imdb.com/title/tt100",
       },
     ]);
-    const writeFileSync = jest.fn();
+    const writeFileSync = vi.fn();
     const originalFetch = globalThis.fetch;
-    globalThis.fetch = jest
+    globalThis.fetch = vi
       .fn()
       .mockResolvedValue(
         createDatasetResponse(
@@ -465,7 +476,7 @@ describe("fetchRatings.js", () => {
     const originalExitCode = process.exitCode;
 
     await runMain({
-      loadMovies: jest.fn().mockReturnValue([
+      loadMovies: vi.fn().mockReturnValue([
         {
           number: 1,
           title: "Movie",
@@ -473,10 +484,10 @@ describe("fetchRatings.js", () => {
           imdbUrl: "https://imdb.com/title/tt101",
         },
       ]),
-      writeFileSync: jest.fn(() => {
+      writeFileSync: vi.fn(() => {
         throw new Error("disk full");
       }),
-      fetchImpl: jest
+      fetchImpl: vi
         .fn()
         .mockResolvedValue(
           createDatasetResponse(
