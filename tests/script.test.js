@@ -43,12 +43,12 @@ global.beckMovies = [
 ];
 
 // Mock DOM methods that might be missing in JSDOM
-Element.prototype.scrollIntoView = jest.fn();
+Element.prototype.scrollIntoView = vi.fn();
 
 // Mock crypto.getRandomValues
 Object.defineProperty(globalThis, "crypto", {
   value: {
-    getRandomValues: jest.fn((buffer) => {
+    getRandomValues: vi.fn((buffer) => {
       buffer[0] = Math.floor(Math.random() * 0xffffffff);
       return buffer;
     }),
@@ -61,7 +61,7 @@ describe("Main Script Tests", () => {
   let generator;
   let scriptLoaded = false;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     document.body.innerHTML = `
             <div>
                 <input id="min-range" type="number" value="1" min="1" max="6">
@@ -89,11 +89,11 @@ describe("Main Script Tests", () => {
       rangeSelector: document.getElementById("range-selector"),
     };
 
-    jest.clearAllTimers();
-    jest.useFakeTimers();
+    vi.clearAllTimers();
+    vi.useFakeTimers();
 
     if (!scriptLoaded) {
-      require("../src/script.js");
+      await import("../src/script.js");
       scriptLoaded = true;
     }
 
@@ -102,7 +102,7 @@ describe("Main Script Tests", () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test("should initialize and handle range validation", () => {
@@ -159,7 +159,7 @@ describe("Main Script Tests", () => {
   });
 
   test("should handle keyboard accessibility", () => {
-    const clickSpy = jest.spyOn(mockElements.generateBtn, "click");
+    const clickSpy = vi.spyOn(mockElements.generateBtn, "click");
 
     // Should trigger on Enter when enabled
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
@@ -199,7 +199,7 @@ describe("Main Script Tests", () => {
     mockElements.maxRange.value = "1";
     mockElements.generateBtn.dispatchEvent(new Event("click"));
 
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     const movieResult = document.getElementById("movie-result");
     expect(movieResult.classList.contains("hidden")).toBe(false);
@@ -223,7 +223,7 @@ describe("Main Script Tests", () => {
     mockElements.maxRange.value = "6";
     mockElements.generateBtn.dispatchEvent(new Event("click"));
 
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     const movieResult = document.getElementById("movie-result");
     expect(movieResult.classList.contains("hidden")).toBe(false);
@@ -241,7 +241,7 @@ describe("Main Script Tests", () => {
     mockElements.maxRange.value = "2";
     mockElements.generateBtn.dispatchEvent(new Event("click"));
 
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     expect(
       document.getElementById("movie-rating").classList.contains("hidden"),
@@ -268,7 +268,7 @@ describe("Main Script Tests", () => {
     mockElements.allMoviesCheckbox.dispatchEvent(new Event("change"));
     mockElements.generateBtn.dispatchEvent(new Event("click"));
 
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     expect(
       document.getElementById("movie-result").classList.contains("hidden"),
@@ -279,24 +279,22 @@ describe("Main Script Tests", () => {
     const originalGetRandom = generator.getRandomNumber;
 
     // Test movie not found
-    generator.getRandomNumber = jest.fn(() => 999);
+    generator.getRandomNumber = vi.fn(() => 999);
     mockElements.generateBtn.dispatchEvent(new Event("click"));
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     let error = document.getElementById("error");
     expect(error.classList.contains("hidden")).toBe(false);
     expect(error.querySelector("p").textContent).toContain("Kunde inte hitta");
 
     // Test exception
-    generator.getRandomNumber = jest.fn(() => {
+    generator.getRandomNumber = vi.fn(() => {
       throw new Error("Test");
     });
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     mockElements.generateBtn.dispatchEvent(new Event("click"));
-    jest.advanceTimersByTime(1100);
+    vi.advanceTimersByTime(1100);
 
     expect(consoleSpy).toHaveBeenCalled();
     expect(error.querySelector("p").textContent).toContain("Ett fel uppstod");
