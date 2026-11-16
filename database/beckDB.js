@@ -539,7 +539,7 @@ const beckMovies = [
         runtime: "1h 27m",
         imdbRating: "6.3"
     },
-        {
+    {
         number: 55,
         title: "Beck 55 - Syndens lön",
         year: 2026,
