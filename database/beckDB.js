@@ -538,6 +538,16 @@ const beckMovies = [
         tv4playUrl: "https://tv4play.se/program/b8164fcb65377305a30d/beck-i-skuggorna-54",
         runtime: "1h 27m",
         imdbRating: "6.3"
+    },
+    {
+        number: 55,
+        title: "Beck 55 - Syndens lön",
+        year: 2026,
+        description: "Läget är spänt i den överbelastade Beck-gruppen när man får ett fall där en kriminell familj verkar vara föremål för en blodig hämndaktion.",
+        imdbUrl: "https://www.imdb.com/title/tt40440961",
+        tv4playUrl: "https://www.tv4play.se/program/800dc6838c4456107911/beck-syndens-lon-55",
+        runtime: "1h 29m",
+        imdbRating: "0.0"
     }
 ];
 
